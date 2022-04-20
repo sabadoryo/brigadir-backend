@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Queue {
+  id            Int           @id @default(autoincrement())
+  name          String        @unique
+  discipline_id Int?
+  amount        Int?
+  is_opened     Boolean       @default(true)
+  discipline    discipline?   @relation(fields: [discipline_id], references: [id])
+  QueueMember   QueueMember[]
+
+  @@index([discipline_id], map: "Queue_discipline_id_fkey")
+}
+
+model QueueMember {
+  id        Int      @id @default(autoincrement())
+  member_id Int
+  queue_id  Int
+  joined_at DateTime @default(now())
+  users     users    @relation(fields: [member_id], references: [id])
+  Queue     Queue    @relation(fields: [queue_id], references: [id])
+
+  @@index([member_id], map: "QueueMember_member_id_fkey")
+  @@index([queue_id], map: "QueueMember_queue_id_fkey")
+}
+
+model clanwar {
+  id                           Int         @id @default(autoincrement())
+  name                         String
+  teamA_id                     Int         @unique
+  teamB_id                     Int         @unique
+  start_time                   DateTime    @default(now())
+  end_time                     DateTime?
+  winner_id                    Int?        @unique
+  voiceA_id                    String?
+  voiceB_id                    String?
+  discipline_id                Int?
+  pog_id                       Int?
+  discipline                   discipline? @relation(fields: [discipline_id], references: [id])
+  users                        users?      @relation(fields: [pog_id], references: [id])
+  team_clanwar_teamA_idToteam  team        @relation("clanwar_teamA_idToteam", fields: [teamA_id], references: [id])
+  team_clanwar_teamB_idToteam  team        @relation("clanwar_teamB_idToteam", fields: [teamB_id], references: [id])
+  team_clanwar_winner_idToteam team?       @relation("clanwar_winner_idToteam", fields: [winner_id], references: [id])
+
+  @@index([discipline_id], map: "clanwar_discipline_id_fkey")
+  @@index([pog_id], map: "clanwar_pog_id_fkey")
+}
+
+model clanwar_profile {
+  id            Int        @id @default(autoincrement())
+  user_id       Int
+  discipline_id Int
+  points        Int        @default(1000)
+  discipline    discipline @relation(fields: [discipline_id], references: [id])
+  users         users      @relation(fields: [user_id], references: [id])
+
+  @@unique([user_id, discipline_id])
+  @@index([discipline_id], map: "clanwar_profile_discipline_id_fkey")
+}
+
+model commands {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  description String @default("")
+}
+
+model discipline {
+  id              Int               @id @default(autoincrement())
+  name            String?           @unique
+  Queue           Queue[]
+  clanwar         clanwar[]
+  clanwar_profile clanwar_profile[]
+  party           party[]
+}
+
+model halyava {
+  id        Int      @id @default(autoincrement())
+  looterId  Int
+  createdAt DateTime @default(now())
+  users     users    @relation(fields: [looterId], references: [id])
+
+  @@index([looterId], map: "halyava_looterId_fkey")
+}
+
+model party {
+  id            Int             @id @default(autoincrement())
+  name          String
+  discipline_id Int?
+  leader_id     Int?
+  discipline    discipline?     @relation(fields: [discipline_id], references: [id])
+  users         users?          @relation(fields: [leader_id], references: [id])
+  party_members party_members[]
+
+  @@index([discipline_id], map: "party_discipline_id_fkey")
+  @@index([leader_id], map: "party_leader_id_fkey")
+}
+
+model party_members {
+  id        Int   @id @default(autoincrement())
+  member_id Int
+  party_id  Int
+  users     users @relation(fields: [member_id], references: [id])
+  party     party @relation(fields: [party_id], references: [id])
+
+  @@index([member_id], map: "party_members_member_id_fkey")
+  @@index([party_id], map: "party_members_party_id_fkey")
+}
+
+model team {
+  id                              Int            @id @default(autoincrement())
+  name                            String
+  clanwar_clanwar_teamA_idToteam  clanwar?       @relation("clanwar_teamA_idToteam")
+  clanwar_clanwar_teamB_idToteam  clanwar?       @relation("clanwar_teamB_idToteam")
+  clanwar_clanwar_winner_idToteam clanwar?       @relation("clanwar_winner_idToteam")
+  team_members                    team_members[]
+}
+
+model team_members {
+  id        Int   @id @default(autoincrement())
+  member_id Int
+  team_id   Int
+  users     users @relation(fields: [member_id], references: [id])
+  team      team  @relation(fields: [team_id], references: [id])
+
+  @@index([member_id], map: "team_members_member_id_fkey")
+  @@index([team_id], map: "team_members_team_id_fkey")
+}
+
+model users {
+  id              Int               @id @default(autoincrement())
+  name            String            @default("")
+  discord_score   Int               @default(0)
+  discord_id      String            @unique @default("")
+  QueueMember     QueueMember[]
+  clanwar         clanwar[]
+  clanwar_profile clanwar_profile[]
+  halyava         halyava[]
+  party           party[]
+  party_members   party_members[]
+  team_members    team_members[]
+}
