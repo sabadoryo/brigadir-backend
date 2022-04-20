@@ -44,8 +44,14 @@ export class StatsService {
     const clanwars = await this.prisma.clanwar.findMany({});
 
     const total = clanwars.reduce((acc, c) => {
-      const diffTime = Math.abs(c.end_time.valueOf() - c.start_time.valueOf());
-      return acc + diffTime;
+      if (c.end_time) {
+        const diffTime = Math.abs(
+          c.end_time.valueOf() - c.start_time.valueOf(),
+        );
+        return acc + diffTime;
+      } else {
+        return acc + 0;
+      }
     }, 0);
 
     return Math.ceil(total / 1000 / 60 / 60);
