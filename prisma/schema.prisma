@@ -8,15 +8,20 @@ datasource db {
 }
 
 model Queue {
-  id            Int           @id @default(autoincrement())
-  name          String        @unique
-  discipline_id Int?
-  amount        Int?
-  is_opened     Boolean       @default(true)
-  discipline    discipline?   @relation(fields: [discipline_id], references: [id])
-  QueueMember   QueueMember[]
+  id               Int           @id @default(autoincrement())
+  name             String        @unique
+  discipline_id    Int?
+  amount           Int?
+  is_opened        Boolean       @default(true)
+  guild_id         String?       @default("634799085991231518")
+  voice_channel_id String?       @default("700559004291563531")
+  host_id          Int?
+  discipline       discipline?   @relation(fields: [discipline_id], references: [id])
+  users            users?        @relation(fields: [host_id], references: [id])
+  QueueMember      QueueMember[]
 
   @@index([discipline_id], map: "Queue_discipline_id_fkey")
+  @@index([host_id], map: "Queue_host_id_fkey")
 }
 
 model QueueMember {
@@ -74,6 +79,7 @@ model commands {
 model discipline {
   id              Int               @id @default(autoincrement())
   name            String?           @unique
+  icon_path       String?
   Queue           Queue[]
   clanwar         clanwar[]
   clanwar_profile clanwar_profile[]
@@ -138,6 +144,8 @@ model users {
   name            String            @default("")
   discord_score   Int               @default(0)
   discord_id      String            @unique @default("")
+  avatar_hash     String?
+  Queue           Queue[]
   QueueMember     QueueMember[]
   clanwar         clanwar[]
   clanwar_profile clanwar_profile[]
