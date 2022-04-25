@@ -35,6 +35,9 @@ export class GuildsService {
           },
         },
       },
+      orderBy: {
+        created_at: 'desc',
+      },
     });
 
     return queues;

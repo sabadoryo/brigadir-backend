@@ -16,6 +16,7 @@ model Queue {
   guild_id         String?       @default("634799085991231518")
   voice_channel_id String?       @default("700559004291563531")
   host_id          Int?
+  created_at       DateTime?     @default(now())
   discipline       discipline?   @relation(fields: [discipline_id], references: [id])
   users            users?        @relation(fields: [host_id], references: [id])
   QueueMember      QueueMember[]
