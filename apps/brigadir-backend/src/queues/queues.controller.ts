@@ -26,4 +26,15 @@ export class QueuesController {
 
     return queue;
   }
+
+  @Post(':id/kick')
+  kickUserFromQueue(@Param('id') queueId: number, @Body() body): any {
+    console.log(body, queueId);
+    const queue = this.queueService.kickUserFromQueue(
+      queueId,
+      body.user_discord_id,
+    );
+
+    return queue;
+  }
 }

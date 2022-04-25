@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { queue } from 'rxjs';
 import { BotService } from '../bot/bot.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -72,5 +73,9 @@ export class QueuesService {
     });
 
     return await this.getQueue(queue.id);
+  }
+
+  async kickUserFromQueue(queueId, userDiscordId) {
+    return await this.leaveQueue(userDiscordId, queueId);
   }
 }
