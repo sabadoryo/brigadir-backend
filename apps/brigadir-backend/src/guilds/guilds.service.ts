@@ -36,7 +36,7 @@ export class GuildsService {
         },
       },
       orderBy: {
-        created_at: 'desc',
+        created_at: 'asc',
       },
     });
 
