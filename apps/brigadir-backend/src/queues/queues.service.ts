@@ -17,6 +17,9 @@ export class QueuesService {
           include: {
             users: true,
           },
+          orderBy: {
+            joined_at: 'asc',
+          },
         },
         discipline: true,
         users: true,
@@ -77,5 +80,53 @@ export class QueuesService {
 
   async kickUserFromQueue(queueId, userDiscordId) {
     return await this.leaveQueue(userDiscordId, queueId);
+  }
+
+  async createQueue({
+    name,
+    host_discord_id,
+    discipline_id,
+    voice_channel_id,
+    guild_id,
+  }) {
+    const user = await this.prisma.users.findFirst({
+      where: { discord_id: host_discord_id },
+    });
+
+    const queue = await this.prisma.queue.create({
+      data: {
+        name,
+        discipline_id: Number(discipline_id),
+        voice_channel_id,
+        guild_id,
+        host_id: user.id,
+        QueueMember: {
+          create: {
+            users: {
+              connect: {
+                id: user.id,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const queueInfo = this.getQueue(queue.id);
+
+    return queueInfo;
+  }
+
+  async closeQueue(queueId) {
+    const queue = await this.prisma.queue.update({
+      where: {
+        id: Number(queueId),
+      },
+      data: {
+        is_opened: false,
+      },
+    });
+
+    return queue;
   }
 }

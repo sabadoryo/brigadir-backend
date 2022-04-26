@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Req } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req } from '@nestjs/common';
 import { GuildsService } from './guilds.service';
 
 @Controller()
@@ -16,5 +16,15 @@ export class GuildsController {
     const queues = this.guildsService.fetchAllGuildQueues(guildId);
 
     return queues;
+  }
+
+  @Get(':guild_id/channels')
+  getGuildChannels(
+    @Query('type') type: string,
+    @Param('guild_id') guildId: string,
+  ): any {
+    const channels = this.guildsService.fetchAllChannels(guildId, type);
+
+    return channels;
   }
 }

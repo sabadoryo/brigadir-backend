@@ -11,6 +11,7 @@ import { BotModule } from './bot/bot.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { QueuesModule } from './queues/queues.module';
+import { DisciplinesModule } from './disciplines/disciplines.module';
 
 @Module({
   imports: [
@@ -38,6 +39,10 @@ import { QueuesModule } from './queues/queues.module';
             path: 'queues',
             module: QueuesModule,
           },
+          {
+            path: 'disciplines',
+            module: DisciplinesModule,
+          },
         ],
       },
     ]),
@@ -47,6 +52,7 @@ import { QueuesModule } from './queues/queues.module';
     GuildsModule,
     BotModule,
     QueuesModule,
+    DisciplinesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -25,4 +25,10 @@ export class BotService {
 
     return channel;
   }
+
+  async findGuildById(guildId) {
+    const guild = await this.client.guilds.fetch(guildId);
+
+    return guild;
+  }
 }

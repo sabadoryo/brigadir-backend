@@ -36,10 +36,22 @@ export class GuildsService {
         },
       },
       orderBy: {
-        created_at: 'asc',
+        created_at: 'desc',
       },
     });
 
     return queues;
+  }
+
+  async fetchAllChannels(guildId, type) {
+    const guild = await this.botService.findGuildById(guildId);
+
+    const channelType = type === 'voice' ? 'GUILD_VOICE' : 'GUILD_TEXT';
+
+    const channels = await guild.channels.cache.filter(
+      (c) => c.type === channelType,
+    );
+
+    return channels;
   }
 }
