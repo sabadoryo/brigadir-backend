@@ -1,23 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
-const whitelist = [
-  'https://brigadir.sabadoryo.com',
-  'http://localhost:3006',
-  undefined,
-];
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.enableCors({
-    origin: (origin, callback) => {
-      if (whitelist.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.log('error');
-        callback(new Error('not allowed by origin'));
-      }
-    },
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Accept');
+    next();
+  });
+
+  app.enableCors({
+    allowedHeaders: '*',
+    origin: '*',
   });
   await app.listen(3000);
 }
