@@ -18,4 +18,11 @@ export class UsersController {
 
     return winner;
   }
+
+  @Get('get-probabilities')
+  async getProbabilities() {
+    const probabilities = await this.usersService.getProbabilities();
+
+    return probabilities;
+  }
 }
