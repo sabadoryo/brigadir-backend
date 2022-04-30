@@ -54,9 +54,14 @@ export class UsersService {
 
     const playersListFlattened = playersList.flat();
 
+    const sponsordIds = [1, 21, 69];
+    const withoutSponsorsList = playersListFlattened.filter(p => {
+      return !sponsordIds.includes(p.id);
+    });
+
     const randomWinner =
-      playersListFlattened[
-        Math.floor(Math.random() * playersListFlattened.length)
+      withoutSponsorsList[
+        Math.floor(Math.random() * withoutSponsorsList.length)
       ];
 
     return randomWinner;
