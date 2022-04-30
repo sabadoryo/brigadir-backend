@@ -16,4 +16,49 @@ export class UsersService {
       },
     });
   }
+
+  async getAll() {
+    return this.prisma.users.findMany({});
+  }
+
+  async getWinner() {
+    const clanwars = await this.prisma.clanwar.findMany({
+      include: {
+        team_clanwar_teamA_idToteam: {
+          include: {
+            team_members: {
+              include: {
+                users: true,
+              },
+            },
+          },
+        },
+        team_clanwar_teamB_idToteam: {
+          include: {
+            team_members: {
+              include: {
+                users: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const playersList = clanwars.map((m) => {
+      return [
+        ...m.team_clanwar_teamA_idToteam.team_members.map(m => m.users),
+        ...m.team_clanwar_teamB_idToteam.team_members.map(m => m.users),
+      ];
+    });
+
+    const playersListFlattened = playersList.flat();
+
+    const randomWinner =
+      playersListFlattened[
+        Math.floor(Math.random() * playersListFlattened.length)
+      ];
+
+    return randomWinner;
+  }
 }
