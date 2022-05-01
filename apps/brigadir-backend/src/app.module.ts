@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { RouterModule } from '@nestjs/core';
 import { AppController } from './app.controller';
@@ -13,6 +18,8 @@ import { join } from 'path';
 import { QueuesModule } from './queues/queues.module';
 import { DisciplinesModule } from './disciplines/disciplines.module';
 import { GamesModule } from './games/games.module';
+import { CreateQueueMiddleware } from './queues/middlewares/createQueue.middleware';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -59,8 +66,15 @@ import { GamesModule } from './games/games.module';
     QueuesModule,
     DisciplinesModule,
     GamesModule,
+    PrismaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(CreateQueueMiddleware)
+      .forRoutes({ path: 'api/queues', method: RequestMethod.POST });
+  }
+}

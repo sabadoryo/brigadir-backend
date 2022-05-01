@@ -1,13 +1,24 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { Response } from 'express';
-import { PrismaService } from '../prisma/prisma.service';
+import { BotService } from '../bot/bot.service';
 import createQueue from './dto/createQueue.dto';
 import joinQueueDto from './dto/joinQueue.dto';
 import { QueuesService } from './queues.service';
 
 @Controller()
 export class QueuesController {
-  constructor(private queueService: QueuesService, private prisma: PrismaService) {}
+  constructor(
+    private queueService: QueuesService,
+    private botService: BotService,
+  ) {}
 
   @Get(':id')
   getQueue(@Param('id') queueId: number): any {
@@ -46,20 +57,12 @@ export class QueuesController {
 
   @Post()
   async createQueue(@Body() data: createQueue, @Res() response: Response) {
-    const alreadyExsistingQueue = await this.prisma.queue.findFirst({
-      where: {
-        is_opened: true,
-        name: data.name,
-      },
-    });
-
-    if (alreadyExsistingQueue) {
-      return response
-        .status(HttpStatus.I_AM_A_TEAPOT)
-        .json({ message: `CW ${data.name} already exists` });
-    }
-
     const queue = await this.queueService.createQueue(data);
+
+    if (data.text_channel_id) {
+      const message = `@everyone очередь на **${queue.name}** открыта!\nСсылка:${process.env.CLIENT_REDIRECT}/clanwars/guilds/${queue.guild_id}/queues/${queue.id}`;
+      this.botService.sendMessageToChannel(data.text_channel_id, message);
+    }
 
     return response.status(HttpStatus.CREATED).json(queue);
   }

@@ -31,4 +31,12 @@ export class BotService {
 
     return guild;
   }
+
+  async sendMessageToChannel(channelId, message) {
+    const channel = await this.client.channels.fetch(channelId);
+
+    channel.send(message);
+
+    return true;
+  }
 }
