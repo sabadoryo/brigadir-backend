@@ -17,9 +17,11 @@ model Queue {
   voice_channel_id String?       @default("700559004291563531")
   host_id          Int?          @default(1)
   created_at       DateTime?     @default(now())
+  text_channel_id  String?
   discipline       discipline?   @relation(fields: [discipline_id], references: [id])
   users            users?        @relation(fields: [host_id], references: [id])
   QueueMember      QueueMember[]
+  clanwar          clanwar?
 
   @@index([discipline_id], map: "Queue_discipline_id_fkey")
   @@index([host_id], map: "Queue_host_id_fkey")
@@ -30,6 +32,7 @@ model QueueMember {
   member_id Int
   queue_id  Int
   joined_at DateTime @default(now())
+  is_ready  Boolean  @default(false)
   users     users    @relation(fields: [member_id], references: [id])
   Queue     Queue    @relation(fields: [queue_id], references: [id])
 
@@ -49,8 +52,10 @@ model clanwar {
   voiceB_id                    String?
   discipline_id                Int?
   pog_id                       Int?
+  queue_id                     Int?        @unique
   discipline                   discipline? @relation(fields: [discipline_id], references: [id])
   users                        users?      @relation(fields: [pog_id], references: [id])
+  Queue                        Queue?      @relation(fields: [queue_id], references: [id])
   team_clanwar_teamA_idToteam  team        @relation("clanwar_teamA_idToteam", fields: [teamA_id], references: [id])
   team_clanwar_teamB_idToteam  team        @relation("clanwar_teamB_idToteam", fields: [teamB_id], references: [id])
   team_clanwar_winner_idToteam team?       @relation("clanwar_winner_idToteam", fields: [winner_id], references: [id])

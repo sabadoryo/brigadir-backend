@@ -20,6 +20,10 @@ import { DisciplinesModule } from './disciplines/disciplines.module';
 import { GamesModule } from './games/games.module';
 import { CreateQueueMiddleware } from './queues/middlewares/createQueue.middleware';
 import { PrismaModule } from './prisma/prisma.module';
+import { SocketModule } from './socket/socket.module';
+import { AppGateway } from './app.gateway';
+import { TeamsModule } from './teams/teams.module';
+import { Team } from 'discord.js';
 
 @Module({
   imports: [
@@ -55,6 +59,10 @@ import { PrismaModule } from './prisma/prisma.module';
             path: 'users',
             module: UsersModule,
           },
+          {
+            path: 'games',
+            module: GamesModule,
+          },
         ],
       },
     ]),
@@ -67,9 +75,11 @@ import { PrismaModule } from './prisma/prisma.module';
     DisciplinesModule,
     GamesModule,
     PrismaModule,
+    SocketModule,
+    TeamsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppGateway],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

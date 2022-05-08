@@ -9,11 +9,11 @@ export type User = any;
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findOne(discord_id: string): Promise<users | undefined> {
+  async findOne(discord_id: string) {
     return this.prisma.users.findFirst({
       where: {
         discord_id,
-      },
+      }
     });
   }
 
@@ -124,5 +124,93 @@ export class UsersService {
       });
     }
     return res;
+  }
+
+  async getUserWithQueues(discord_id) {
+    return this.prisma.users.findFirst({
+      where: {
+        discord_id,
+      },
+      include: {
+        QueueMember: {
+          include: {
+            Queue: true,
+          },
+        },
+      },
+    });
+  }
+
+  async updateIsReadyOnQueue(userId, queueMemberId, isReady) {
+    return this.prisma.users.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        QueueMember: {
+          update: {
+            where: {
+              id: queueMemberId,
+            },
+            data: {
+              is_ready: isReady,
+            },
+          },
+        },
+      },
+      include: {
+        QueueMember: {
+          include: {
+            Queue: {
+              include: {
+                QueueMember: {
+                  include: {
+                    users: true,
+                  },
+                },
+                discipline: true,
+                users: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async upsertUser(user) {
+    return this.prisma.users.upsert({
+      where: {
+        discord_id: user.id,
+      },
+      create: {
+        discord_id: user.id,
+        name: user.username,
+        discord_score: 1,
+        avatar_hash: user.avatar,
+      },
+      update: {
+        discord_id: user.id,
+        name: user.username,
+        avatar_hash: user.avatar,
+      },
+    });
+  }
+
+  async getUsersWithClanwarProfile(userIds, discipline_id) {
+    return this.prisma.users.findMany({
+      where: {
+        id: {
+          in: userIds,
+        },
+      },
+      include: {
+        clanwar_profile: {
+          where: {
+            discipline_id: discipline_id,
+          },
+        },
+      },
+    });
   }
 }

@@ -14,9 +14,7 @@ export class GuildsService {
       try {
         await guild[1].members.fetch(userId);
         userGuilds.push(guild[1]);
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) {}
     }
     return userGuilds;
   }

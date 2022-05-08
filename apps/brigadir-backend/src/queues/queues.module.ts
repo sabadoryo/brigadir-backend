@@ -8,5 +8,6 @@ import { QueuesService } from './queues.service';
   controllers: [QueuesController],
   providers: [QueuesService],
   imports: [PrismaModule, BotModule],
+  exports: [QueuesService],
 })
 export class QueuesModule {}

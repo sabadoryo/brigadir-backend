@@ -9,6 +9,7 @@ export class AuthService {
     const user = await this.usersService.findOne(discordId);
     console.log(user);
     if (!user) {
+      console.log(discordId);
       throw new UnauthorizedException();
     }
 

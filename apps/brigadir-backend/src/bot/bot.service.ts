@@ -6,7 +6,13 @@ export class BotService {
   client = null;
 
   constructor() {
-    this.client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+    this.client = new Client({
+      intents: [
+        Intents.FLAGS.GUILDS,
+        Intents.FLAGS.GUILD_VOICE_STATES,
+        Intents.FLAGS.GUILD_MEMBERS,
+      ],
+    });
     this.client.login(process.env.BOT_TOKEN);
 
     this.client.once('ready', () => {
@@ -32,11 +38,58 @@ export class BotService {
     return guild;
   }
 
-  async sendMessageToChannel(channelId, message) {
+  async sendMessageToChannel(channelId, message, components = null) {
     const channel = await this.client.channels.fetch(channelId);
+    let msg = null;
+    if (components) {
+      msg = channel.send({
+        components: [components],
+        content: message,
+      });
+    } else {
+      msg = channel.send(message);
+    }
 
-    channel.send(message);
+    return msg;
+  }
 
-    return true;
+  async createVoiceChannel(guildId, name, groupChannelId) {
+    const groupUpChannel = await this.client.channels.fetch(groupChannelId);
+    const parentOfGroupUpChannel = await this.client.channels.fetch(
+      groupUpChannel.parentId,
+    );
+
+    const guild = await this.client.guilds.fetch(guildId);
+
+    const voiceChannel = await guild.channels.create(name, {
+      type: 'GUILD_VOICE',
+      parent: parentOfGroupUpChannel,
+    });
+
+    return voiceChannel;
+  }
+
+  async changeChannelOfAPlayer(playerDiscordId, fromChannelId, toChannelId) {
+    const fromChannel = await this.getChannel(fromChannelId);
+
+    console.log(fromChannel.members);
+
+    if (fromChannel.members.get(playerDiscordId)) {
+      fromChannel.members.get(playerDiscordId).voice.setChannel(toChannelId);
+    } else {
+      console.log(`${playerDiscordId} is not found in channel`);
+    }
+  }
+
+  async transferFromChannelToChannel(fromChannelId, toChannelId) {
+    const fromChannel = await this.client.channels.fetch(fromChannelId);
+
+    for (const [memberId, member] of fromChannel.members) {
+      member.voice.setChannel(toChannelId);
+    }
+
+    setTimeout(() => {
+      fromChannel.delete();
+    }, 20000);
   }
 }

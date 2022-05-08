@@ -88,6 +88,7 @@ export class QueuesService {
     discipline_id,
     voice_channel_id,
     guild_id,
+    text_channel_id,
   }) {
     const user = await this.prisma.users.findFirst({
       where: { discord_id: host_discord_id },
@@ -98,6 +99,7 @@ export class QueuesService {
         name,
         discipline_id: Number(discipline_id),
         voice_channel_id,
+        text_channel_id,
         guild_id,
         host_id: user.id,
         QueueMember: {
@@ -128,5 +130,54 @@ export class QueuesService {
     });
 
     return queue;
+  }
+
+  async findUserActiveQueues(memberDiscordId) {
+    return this.prisma.queue.findMany({
+      where: {
+        is_opened: true,
+        QueueMember: {
+          some: {
+            users: {
+              discord_id: memberDiscordId,
+            },
+          },
+        },
+      },
+      include: {
+        QueueMember: {
+          include: {
+            users: true,
+          },
+          orderBy: {
+            joined_at: 'asc',
+          },
+        },
+        discipline: true,
+        users: true,
+      },
+    });
+  }
+
+  async updateQueueMemberStatus(queueId, queueMemberId, isReady) {
+    const queue = await this.prisma.queue.update({
+      where: {
+        id: queueId,
+      },
+      data: {
+        QueueMember: {
+          update: {
+            where: {
+              id: queueMemberId,
+            },
+            data: {
+              is_ready: isReady,
+            },
+          },
+        },
+      },
+    });
+
+    return this.getQueue(queue.id);
   }
 }
