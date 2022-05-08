@@ -28,7 +28,14 @@ export class QueuesController {
   }
 
   @Post(':id/join')
-  joinQueue(@Param('id') queueId: number, @Body() body: joinQueueDto): any {
+  joinQueue(
+    @Param('id') queueId: number,
+    @Body() body: joinQueueDto,
+    @Res() response: Response,
+  ): any {
+    if (!body.user_discord_id) {
+      return response.status(HttpStatus.FAILED_DEPENDENCY);
+    }
     const queue = this.queueService.joinQueue(body.user_discord_id, queueId);
 
     return queue;
