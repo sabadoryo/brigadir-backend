@@ -32,6 +32,7 @@ export class QueuesService {
   }
 
   async joinQueue(userDiscrdId: string, queueId: number) {
+    console.log(userDiscrdId, queueId);
     const user = await this.prisma.users.findFirst({
       where: {
         discord_id: userDiscrdId,
