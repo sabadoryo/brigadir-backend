@@ -12,7 +12,7 @@ import { BotService } from '../bot/bot.service';
 import createQueue from './dto/createQueue.dto';
 import joinQueueDto from './dto/joinQueue.dto';
 import { QueuesService } from './queues.service';
-
+ 
 @Controller()
 export class QueuesController {
   constructor(

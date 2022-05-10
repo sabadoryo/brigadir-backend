@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { queue } from 'rxjs';
 import { BotService } from '../bot/bot.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -32,7 +33,6 @@ export class QueuesService {
   }
 
   async joinQueue(userDiscrdId: string, queueId: number) {
-    console.log(userDiscrdId, queueId);
     const user = await this.prisma.users.findFirst({
       where: {
         discord_id: userDiscrdId,
@@ -180,5 +180,32 @@ export class QueuesService {
     });
 
     return this.getQueue(queue.id);
+  }
+
+  @Cron(CronExpression.EVERY_12_HOURS)
+  async handleCron() {
+    const difference = new Date(
+      new Date().setTime(new Date().getTime() - 36 * 60 * 60 * 1000),
+    );
+
+    const queues = await this.prisma.queue.findMany({
+      where: {
+        created_at: {
+          lte: difference,
+        },
+        is_opened: true,
+      },
+    });
+
+    queues.map(async (q) => {
+      await this.prisma.queue.update({
+        where: {
+          id: q.id,
+        },
+        data: {
+          is_opened: false,
+        },
+      });
+    });
   }
 }

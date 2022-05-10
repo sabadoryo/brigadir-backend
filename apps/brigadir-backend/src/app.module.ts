@@ -23,10 +23,11 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SocketModule } from './socket/socket.module';
 import { AppGateway } from './app.gateway';
 import { TeamsModule } from './teams/teams.module';
-import { Team } from 'discord.js';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
