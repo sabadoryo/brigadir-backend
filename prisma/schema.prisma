@@ -86,6 +86,7 @@ model discipline {
   id              Int               @id @default(autoincrement())
   name            String?           @unique
   icon_path       String?
+  label           String?
   Queue           Queue[]
   clanwar         clanwar[]
   clanwar_profile clanwar_profile[]

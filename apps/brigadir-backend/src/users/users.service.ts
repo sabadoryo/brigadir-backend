@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { users } from '@prisma/client';
+import { BotService } from '../bot/bot.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 // This should be a real class/interface representing a user entity
@@ -7,13 +8,13 @@ export type User = any;
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private bot: BotService) {}
 
   async findOne(discord_id: string) {
     return this.prisma.users.findFirst({
       where: {
         discord_id,
-      }
+      },
     });
   }
 
@@ -209,6 +210,54 @@ export class UsersService {
           where: {
             discipline_id: discipline_id,
           },
+        },
+      },
+    });
+  }
+
+  async getClanwarProfiles(userId) {
+    return this.prisma.users.findFirst({
+      where: {
+        id: userId,
+      },
+      include: {
+        clanwar_profile: {
+          include: {
+            discipline: true,
+          },
+        },
+      },
+    });
+  }
+
+  async fetchUserFromDiscord(discordId) {
+    const user = this.bot.client.users.fetch(discordId);
+
+    return user;
+  }
+
+  async updateClanwarProfilePoints(userId, disciplineId, points) {
+    return this.prisma.clanwar_profile.update({
+      where: {
+        user_id_discipline_id: {
+          user_id: Number(userId),
+          discipline_id: Number(disciplineId),
+        },
+      },
+      data: {
+        points: Number(points),
+      },
+    });
+  }
+
+  async updateUserDiscordScore(userId, points, type) {
+    return this.prisma.users.update({
+      where: {
+        id: Number(userId),
+      },
+      data: {
+        discord_score: {
+          increment: type === 'inc' ? points : -points,
         },
       },
     });
