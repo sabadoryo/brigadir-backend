@@ -56,7 +56,11 @@ export class UsersService {
       ];
     });
 
-    const playersListFlattened = playersList.flat();
+    const playersListFlattened = [
+      ...new Map(
+        playersList.flat().map((item) => [item['name'], item]),
+      ).values(),
+    ];
 
     const sponsordIds = [1, 3, 52, 94, 29, 78];
     const withoutSponsorsList = playersListFlattened.filter(p => {
@@ -93,6 +97,9 @@ export class UsersService {
           },
         },
       },
+      where: {
+        discipline_id: 4,
+      },
     });
 
     const playersList = clanwars.map((m) => {
@@ -102,7 +109,11 @@ export class UsersService {
       ];
     });
 
-    const playersListFlattened = playersList.flat();
+    const playersListFlattened = [
+      ...new Map(
+        playersList.flat().map((item) => [item['name'], item]),
+      ).values(),
+    ];
 
     const sponsordIds = [1, 21, 69];
     const withoutSponsorsList = playersListFlattened.filter(p => {
