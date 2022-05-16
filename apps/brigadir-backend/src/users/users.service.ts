@@ -62,7 +62,7 @@ export class UsersService {
       ).values(),
     ];
 
-    const sponsordIds = [1, 3, 52, 94, 29, 78];
+    const sponsordIds = [1, 3];
     const withoutSponsorsList = playersListFlattened.filter(p => {
       return !sponsordIds.includes(p.id);
     });
