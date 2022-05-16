@@ -44,6 +44,9 @@ export class UsersService {
           },
         },
       },
+      where: {
+        discipline_id: 4,
+      },
     });
 
     const playersList = clanwars.map((m) => {
@@ -55,7 +58,7 @@ export class UsersService {
 
     const playersListFlattened = playersList.flat();
 
-    const sponsordIds = [1, 21, 69];
+    const sponsordIds = [1, 3, 52, 94, 29, 78];
     const withoutSponsorsList = playersListFlattened.filter(p => {
       return !sponsordIds.includes(p.id);
     });
