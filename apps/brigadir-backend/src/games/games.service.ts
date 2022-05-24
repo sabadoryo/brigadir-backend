@@ -346,7 +346,7 @@ export class GamesService {
       15,
     );
 
-    await this.setGamePog(this.clanwar.id, pog.id);
+    await this.setGamePog(this.clanwar.id, pogId);
 
     mvpPollMessage.edit({
       content: `@everyone POG of **${this.clanwar.name}** is  <@${pog.users.discord_id}>:crown:`,
@@ -413,7 +413,7 @@ export class GamesService {
         id: clanwarId,
       },
       data: {
-        pog_id: pogId,
+        pog_id: Number(pogId),
       },
     });
   }
