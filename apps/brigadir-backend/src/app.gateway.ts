@@ -75,7 +75,6 @@ export class AppGateway
 
   @SubscribeMessage('updateQueue')
   async handleMessage(client: any, payload: any) {
-    console.log(client, payload);
     const queue = await this.queueServce.getQueue(payload.queueId);
     this.server.to(String(queue.id)).emit('updateQueue', queue);
   }

@@ -89,4 +89,25 @@ export class UsersController {
       });
     }
   }
+
+  @Get(':discord_id/teammates-stats')
+  async getUserTeammatesStats(@Param('discord_id') discordId: string) {
+    const stats = await this.usersService.getTeammatesStats(discordId);
+
+    return stats;
+  }
+
+  @Get(':discord_id/clanwars-stats')
+  async getUserClanwarStats(@Param('discord_id') discordId: string) {
+    const stats = await this.usersService.getClanwarStats(discordId);
+
+    return stats;
+  }
+
+  @Get(':discord_id/pog-stats')
+  async getUserPogStats(@Param('discord_id') discordId: string) {
+    const stats = await this.usersService.getPogStats(discordId);
+
+    return stats;
+  }
 }

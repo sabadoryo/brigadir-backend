@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { users } from '@prisma/client';
+import { stat } from 'fs';
 import { BotService } from '../bot/bot.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -275,5 +276,178 @@ export class UsersService {
         },
       },
     });
+  }
+
+  async getTeammatesStats(discordId) {
+    const userTeams = await this.prisma.team.findMany({
+      where: {
+        team_members: {
+          some: {
+            users: {
+              discord_id: discordId,
+            },
+          },
+        },
+      },
+      include: {
+        team_members: {
+          include: {
+            users: true,
+          },
+        },
+        clanwar_clanwar_winner_idToteam: true,
+      },
+    });
+
+    const loserTeams = userTeams
+      .filter((t) => t.clanwar_clanwar_winner_idToteam === null)
+      .map((lt) => lt.team_members);
+
+    const winnerTeams = userTeams
+      .filter((t) => t.clanwar_clanwar_winner_idToteam !== null)
+      .map((wt) => wt.team_members);
+
+    const stats = {};
+
+    userTeams.map((t) => {
+      t.team_members.map((tm) => {
+        if (tm.users.discord_id === discordId) return;
+
+        stats[tm.member_id] = {
+          loses: 0,
+          wins: 0,
+          ...tm.users,
+        };
+
+        loserTeams.map((lt) => {
+          lt.map((t) => {
+            if (t.member_id === tm.member_id) {
+              stats[tm.member_id].loses += 1;
+            }
+          });
+        });
+
+        winnerTeams.map((wt) => {
+          wt.map((t) => {
+            if (tm.member_id === t.member_id) {
+              stats[tm.member_id].wins += 1;
+            }
+          });
+        });
+      });
+    });
+
+    return this.statsObjectToArray(stats);
+  }
+
+  async getClanwarStats(discrdId) {
+    const clanwars = await this.prisma.clanwar.findMany({
+      where: {
+        OR: [
+          {
+            team_clanwar_teamA_idToteam: {
+              team_members: {
+                some: {
+                  users: {
+                    discord_id: discrdId,
+                  },
+                },
+              },
+            },
+          },
+          {
+            team_clanwar_teamB_idToteam: {
+              team_members: {
+                some: {
+                  users: {
+                    discord_id: discrdId,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        team_clanwar_winner_idToteam: {
+          include: {
+            team_members: {
+              include: {
+                users: true,
+              },
+            },
+          },
+        },
+        discipline: true,
+      },
+    });
+
+    const result = {};
+
+    clanwars.map((clanwar) => {
+      if (!result[clanwar.discipline.name]) {
+        result[clanwar.discipline.name] = {
+          loses: 0,
+          wins: 0,
+          unfinished: 0,
+          ...clanwar.discipline,
+        };
+      }
+
+      if (!clanwar.winner_id) {
+        result[clanwar.discipline.name].unfinished += 1;
+      } else {
+        const winnerUsersDiscordId =
+          clanwar.team_clanwar_winner_idToteam.team_members.map(
+            (m) => m.users.discord_id,
+          );
+
+        if (winnerUsersDiscordId.includes(discrdId)) {
+          result[clanwar.discipline.name].wins += 1;
+        } else {
+          result[clanwar.discipline.name].loses += 1;
+        }
+      }
+    });
+
+    return this.statsObjectToArray(result);
+  }
+
+  async getPogStats(discordId) {
+    const clanwars = await this.prisma.clanwar.findMany({
+      where: {
+        users: {
+          discord_id: discordId,
+        },
+      },
+      include: {
+        discipline: true,
+      },
+    });
+
+    const result = {};
+
+    clanwars.map((c) => {
+      if (!result[c.discipline.name]) {
+        result[c.discipline.name] = {
+          pog_times: 1,
+          ...c.discipline,
+        };
+      } else {
+        result[c.discipline.name].pog_times += 1;
+      }
+    });
+
+    return this.statsObjectToArray(result);
+  }
+
+  statsObjectToArray(statsObject) {
+    const res = [];
+
+    for (const property in statsObject) {
+      res.push(statsObject[property]);
+    }
+
+    return res;
   }
 }

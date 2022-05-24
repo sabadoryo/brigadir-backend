@@ -54,6 +54,15 @@ export class QueuesService {
         },
       },
     });
+
+    const channel = await this.bot.getChannel(queue.voice_channel_id);
+
+    for (const [memberId, member] of channel.members) {
+      if (memberId == userDiscrdId) {
+        this.updateQueueMemberStatus(queue.id, user.id, true);
+      }
+    }
+
     return await this.getQueue(queue.id);
   }
 
@@ -113,6 +122,7 @@ export class QueuesService {
         },
       },
     });
+
 
     const queueInfo = this.getQueue(queue.id);
 
